@@ -3,30 +3,29 @@ import node
 from PBFT import PBFTAggregator
 
 if __name__ == '__main__':
-
-    x = 70 # n in 3n+1
+    # loop = asyncio.get_event_loop() (for python 3.10 and below)
+    loop = asyncio.new_event_loop() # (for python 3.11 and above)
+    asyncio.set_event_loop(loop)
+    x = 2 # n in 3n+1
     pbft = PBFTAggregator(x)
 
     total_nodes = pbft.getNodes()
     byzantine_nodes = pbft.getByzantineNodes()
-    commander_node = pbft.getCommanderNode()
+    commander_nodes = pbft.getCommanderNode()
     nodes = []
 
 
     print(f"Total Nodes: {len(total_nodes)} -> {total_nodes}")
     print(f"Byzantine Nodes: {len(byzantine_nodes)} -> {byzantine_nodes}")
-    print(f"Commander Node: {commander_node}")
-
-
-    loop = asyncio.get_event_loop()
+    print(f"Commander Node: {len(commander_nodes)} -> {commander_nodes}")
 
     for i in total_nodes:
-        if int(i) == commander_node:
-            nodes.append(node.Commander(8080 + i, loop, True if int(i) in byzantine_nodes else False))
+        if int(i) in commander_nodes:
+            nodes.append(node.Node(8080 + i, loop, total_nodes, True if int(i) in byzantine_nodes else False, True))
         elif int(i) in byzantine_nodes:
-            nodes.append(node.Node(8080 + i, loop, True))
+           nodes.append(node.Node(8080 + i, loop, total_nodes, True))
         else:
-            nodes.append(node.Node(8080 + i, loop))
+            nodes.append(node.Node(8080 + i, loop, total_nodes))
 
     print("\n Starting Nodes \n")
 
