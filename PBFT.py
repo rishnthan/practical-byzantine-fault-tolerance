@@ -1,8 +1,7 @@
 import random
 import aiohttp
 
-
-replies_list = []
+replies_list = {}
 
 class PBFTAggregator:
     def __init__(self, num_of_corrupt, num_of_commanders=1):
@@ -50,14 +49,17 @@ class PBFTAggregator:
                 print(f"Response: {response.status}")
     
     @staticmethod
-    def receiveReplies(json):
-        replies_list.append(json)
+    def initReplies(total_nodes):
+        for i in range(total_nodes):
+            replies_list[i] = []
 
     @staticmethod
+    def receiveReplies(data):
+        replies_list[data[0]].append(data[1])
+    
+    @staticmethod
     def checkReplies():
-        num_of_msg_corrupted = replies_list.count("Corrupt")
-        num_of_msg_correct = replies_list.count("very-important-data")
-        if num_of_msg_correct > num_of_msg_corrupted:
-            return "Consensus Reached: Result > Correct Data"
-        else:
-            return "Consensus Reached: Result > Corrupt Data"
+        for key, value in replies_list.items():
+            num_of_corrupt = value.count("Corrupt")
+            num_of_correct = value.count("very-important-data")
+            print(f"Node {key} -> {num_of_correct} Correct {num_of_corrupt} Corrupt")

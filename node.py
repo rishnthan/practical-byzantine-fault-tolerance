@@ -31,52 +31,54 @@ class Node:
         if self.commander:
             message = await request.json()
             start_time = datetime.now()
+            print(f"Node {self.id} Received Client's Request: {message}")
             for i in self.nodes_list:
                 if self.id != i:
+                    print(f"Node {self.id} Sending PrePrepare Message to Node {i})")
                     async with self.session.post(f'http://localhost:{8080 + i}/preprepare', json=message) as response:
                         pass
             end_time = datetime.now()
             execution_time = (end_time - start_time).total_seconds()
-            # results = PBFTAggregator.checkReplies()
+            print(f"\n\nPBFT Consensus Time: {execution_time}")
+            PBFTAggregator.checkReplies()
             return web.Response(text=f'\nPBFT Consensus Time: {execution_time}s\n')
         else:
             return web.HTTPUnauthorized()
 
     async def pre_prepare(self, request):
         message = await request.json()
-        print(f"Node {self.id} received pre-prepare message")
         if self.corrupt:
             message["data"] = "Corrupt"
         for i in self.nodes_list:
-                if self.id != i:
+                if self.id != i:   
+                    print(f"Node {self.id} Sending Prepare Message to Node {i})")
                     async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=message) as response:
                         pass
         return web.HTTPOk()
     
     async def prepare(self, request):
         message = await request.json()
-        print(f"Node {self.id} received prepare message")
         if self.corrupt and self.commander:
             message["data"] = "Corrupt"
         for i in self.nodes_list:
                 if self.id != i:
+                    print(f"Node {self.id} Sending Commit Message to Node {i})")
                     async with self.session.post(f'http://localhost:{8080 + i}/commit', json=message) as response:
                         pass
         return web.HTTPOk()
     
     async def commit(self, request):
-        print(f"Node {self.id} received commit message")
         message = await request.json()
         for i in self.nodes_list:
                 if self.id != i:
+                    print(f"Node {self.id} Sending Reply Message to Node {i})")
                     async with self.session.post(f'http://localhost:{8080 + i}/reply', json=message) as response:
                         pass
         return web.HTTPOk()
     
     async def reply(self, request):
         message = await request.json()
-        PBFTAggregator.receiveReplies(message["data"])
-        print(f"Node {self.id} sent reply message")
+        PBFTAggregator.receiveReplies([self.id, message["data"]])
         return web.HTTPOk()
 
     def start(self):
