@@ -9,22 +9,31 @@ class Node:
     def __init__(self, port, loop, nodes_list, corrupt=False, commander=False):
         self.port = port
         self.loop = loop
+        # Creates webserver's application
         self.app = web.Application()
+        # Creates the routes for the PBFT nodes
         self.app.add_routes([web.get('/status', self.status),
                              web.post('/preprepare', self.pre_prepare),
                              web.post('/prepare', self.prepare),
                              web.post('/commit', self.commit),
                              web.post('/reply', self.reply)])
+        # Creates the handler
         self.handler = self.app.make_handler()
+        # Creates empty server to store asyncio loop at start()
         self.server = None
+        # Changes the attribute of the node
         self.corrupt = corrupt
         self.commander = commander
+        # Saves ID of the node
         self.id = self.port - 8080
+        # Sends the list of all the nodes within the network (even offline ones)
         self.nodes_list = nodes_list
+        # Creates aiohttp client session for sending requests back and forth for PBFT
         self.session = aiohttp.ClientSession()
 
     # Handler for status router
     async def status(self, request):
+        # Shows status of node
         return web.json_response(f'Node {self.id} Up and Running')
 
     # First stage of PBFT - Pre-Prepare
@@ -84,11 +93,15 @@ class Node:
     # Starting the Node
     def start(self):
         try:
+            # Creates coroutine for webserver
             coroutine = self.loop.create_server(
                 self.handler, '0.0.0.0', self.port)
+            # Starts the loop for the webserver
             self.server = self.loop.run_until_complete(coroutine)
+            # Gets address and port to print out information of the node
             address, port = self.server.sockets[0].getsockname()
             print(f'Node {self.id} started on http://{address}:{port}')
+        # Checks if any exception is raised during creation process
         except Exception as e:
             sys.stderr.write('Error: ' + format(str(e)) + "\n")
             sys.exit(1)
@@ -96,7 +109,10 @@ class Node:
     # Killing the Node
     def kill(self):
         # await self.session.close()
+        # closes node's webserver
         self.server.close()
+        # stops the webserver app, handler and
+        # initiates cleanup
         self.loop.run_until_complete(self.app.shutdown())
         self.loop.run_until_complete(self.handler.shutdown(60.0))
         self.loop.run_until_complete(self.app.cleanup())
