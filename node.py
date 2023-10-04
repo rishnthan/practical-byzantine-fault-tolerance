@@ -37,14 +37,14 @@ class Node:
                         pass
             end_time = datetime.now()
             execution_time = (end_time - start_time).total_seconds()
-            results = PBFTAggregator.checkReplies()
-            return web.Response(text=f'\nPBFT Consensus Time: {execution_time}s\n'
-                                     f'Results: {results}\n\n')
+            # results = PBFTAggregator.checkReplies()
+            return web.Response(text=f'\nPBFT Consensus Time: {execution_time}s\n')
         else:
             return web.HTTPUnauthorized()
 
     async def pre_prepare(self, request):
         message = await request.json()
+        print(f"Node {self.id} received pre-prepare message")
         if self.corrupt:
             message["data"] = "Corrupt"
         for i in self.nodes_list:
@@ -55,6 +55,7 @@ class Node:
     
     async def prepare(self, request):
         message = await request.json()
+        print(f"Node {self.id} received prepare message")
         if self.corrupt and self.commander:
             message["data"] = "Corrupt"
         for i in self.nodes_list:
@@ -64,6 +65,7 @@ class Node:
         return web.HTTPOk()
     
     async def commit(self, request):
+        print(f"Node {self.id} received commit message")
         message = await request.json()
         for i in self.nodes_list:
                 if self.id != i:
@@ -74,6 +76,7 @@ class Node:
     async def reply(self, request):
         message = await request.json()
         PBFTAggregator.receiveReplies(message["data"])
+        print(f"Node {self.id} sent reply message")
         return web.HTTPOk()
 
     def start(self):
