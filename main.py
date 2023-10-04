@@ -7,7 +7,14 @@ if __name__ == '__main__':
     loop = asyncio.new_event_loop() # (for python 3.11 and above)
     asyncio.set_event_loop(loop)
 
-    x = 1 # n in 3n+1
+    # As of 10/4/2023
+    # n = 1 -   47.08s
+    # n = 2 -  507.40s
+    # n = 3 - 1675.69s
+    # n > 3 -> Causes an error "Error in handling Request"
+    # need to debug this error
+    
+    x = 3 # n in 3n+1
     type_of_byzantine = 1 # 0 - Offline Nodes, 1 - Malicious (Falsifying) Nodes
 
     pbft = PBFTAggregator(x)
