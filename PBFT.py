@@ -62,6 +62,12 @@ class PBFTAggregator:
     @staticmethod
     def receiveReplies(data):
         replies_list[data[0]].append(data[1])
+
+    # Resets replies_list for next consensus run
+    @staticmethod
+    def resetReplies(total_nodes):
+        replies_list.clear()
+        PBFTAggregator.initReplies(total_nodes)
     
     # Counts and display node's data and number of corrupted, correct entries
     @staticmethod

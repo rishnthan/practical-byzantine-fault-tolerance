@@ -8,14 +8,11 @@ if __name__ == '__main__':
     asyncio.set_event_loop(loop)
 
     # As of 10/4/2023
-    # n = 1 -   47.08s
-    # n = 2 -  507.40s
-    # n = 3 - 1675.69s
     # n > 3 -> Causes an error "Error in handling Request"
     # need to debug this error
-    
+
     # Mutable variables - Can change this
-    x = 3 # number of byzantine nodes
+    x = 1 # number of byzantine nodes
     type_of_byzantine = 1 # 0 - Offline Nodes, 1 - Malicious (Falsifying) Nodes
 
     # Creates PBFTAggregator class object with x number of byzantine nodes
@@ -73,6 +70,8 @@ if __name__ == '__main__':
     for node in nodes:
         node.start()
     
+    print(f"\nNode {int(commander_nodes[0])} is the commander node.\n" 
+          f"Running on http://0.0.0.0:{8080 + int(commander_nodes[0])}")
     # initializes the replies list to collect the replies of the nodes from PBFT
     # once nodes are created and started.
     PBFTAggregator.initReplies(len(nodes))

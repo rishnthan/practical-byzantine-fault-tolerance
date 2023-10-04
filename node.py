@@ -3,6 +3,8 @@ from aiohttp import web
 import sys
 from datetime import datetime
 from PBFT import PBFTAggregator
+import random
+
 
 class Node:
     # initializing the node
@@ -27,7 +29,8 @@ class Node:
         # Saves ID of the node
         self.id = self.port - 8080
         # Sends the list of all the nodes within the network (even offline ones)
-        self.nodes_list = nodes_list
+        self.nodes_list = list(nodes_list)
+        self.nodes_list.remove(self.id)
         # Creates aiohttp client session for sending requests back and forth for PBFT
         self.session = aiohttp.ClientSession()
 
@@ -44,14 +47,23 @@ class Node:
             # Checking execution time
             start_time = datetime.now()
             # Sending client's message to all the nodes which initiates the pre-prepare stage
+            fake_message = {"data": "Corrupt"}
+            random_node = -1
+            if self.corrupt:
+                random_node = int(random.choice(self.nodes_list))
             for i in self.nodes_list:
-                if self.id != i:
+                if i == random_node:
+                    async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=fake_message) as response:
+                        pass
+                else:
                     async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=message) as response:
                         pass
             end_time = datetime.now()
             execution_time = (end_time - start_time).total_seconds()
-            print(f"\n\nPBFT Consensus Time: {execution_time}")
+            print(f"\n\nPBFT Consensus Time: {execution_time}s")
             PBFTAggregator.checkReplies()
+            # Resetting replies_list for next consensus run
+            PBFTAggregator.resetReplies(len(self.nodes_list) + 1)
             return web.Response(text=f'\nPBFT Consensus Time: {execution_time}s\n')
         else:
             return web.HTTPUnauthorized()
@@ -65,29 +77,24 @@ class Node:
             message["data"] = "Corrupt"
         # Sending received message from Commander Node to all the other nodes which initiates the prepare stage
         for i in self.nodes_list:
-                if self.id != i:
-                    await self.session.post(f'http://localhost:{8080 + i}/commit', json=message)
+            await self.session.post(f'http://localhost:{8080 + i}/commit', json=message)
         return web.HTTPOk()
-    
+
     # Third stage of PBFT - Commit
     async def commit(self, request):
         message = await request.json()
-        # For type_of_byzantine = 1 (Malicious (Falsifying) Nodes)
-        # Corrupts the message only if the node is a commander node and corrupt
-        if self.corrupt and self.commander:
-            message["data"] = "Corrupt"
         # Sending prepare message from all other nodes to all the other nodes which initiates the commit stage
         for i in self.nodes_list:
-                if self.id != i:
-                    await self.session.post(f'http://localhost:{8080 + i}/reply', json=message)
+            await self.session.post(f'http://localhost:{8080 + i}/reply', json=message)
         return web.HTTPOk()
-    
+
     # Final stage of PBFT - Reply
     async def reply(self, request):
         message = await request.json()
         # Receiving commit message from all other nodes
         # Sending the message to Client
-        PBFTAggregator.receiveReplies([self.id, message["data"]]) # Simulating sending reply to client
+        # Simulating sending reply to client
+        PBFTAggregator.receiveReplies([self.id, message["data"]])
         return web.HTTPOk()
 
     # Starting the Node
