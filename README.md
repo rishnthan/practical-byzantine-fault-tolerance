@@ -7,7 +7,7 @@
 4. Notes
 
 ## 1.0 Information
-This is a simple implementation of the well-known Practical Byzantine Fault Tolerance (PBFT) consensus algorithm [[1]](https://pmg.csail.mit.edu/papers/osdi99.pdf). PBFT was designed as a method to solve the Byzantine General's Problem [[2]](https://www.microsoft.com/en-us/research/publication/byzantine-generals-problem/) in a distributed system.
+This is a simple implementation in Python of the well-known Practical Byzantine Fault Tolerance (PBFT) consensus algorithm [[1]](https://pmg.csail.mit.edu/papers/osdi99.pdf). PBFT was designed as a method to solve the Byzantine General's Problem [[2]](https://www.microsoft.com/en-us/research/publication/byzantine-generals-problem/) in a distributed system. 
 
 There are a few types of byzantine faults:-
 1. Failure to return a result
