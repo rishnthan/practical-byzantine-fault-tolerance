@@ -1,12 +1,13 @@
-import aiohttp
 import asyncio
+import aiohttp
 
-async def send_request():
+data = {
+    "data": "very-important-data",}
+
+async def main():
     for i in range(5):
         async with aiohttp.ClientSession() as session:
-            data = {"data": "very-important-data"}
-            async with session.post("http://localhost:8081/receive", json=data) as response:
-                print(await response.text())
+            async with session.post('http://localhost:8080/receive', json=data) as resp:
+                print(await resp.text)
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(send_request())
+asyncio.run(main())
