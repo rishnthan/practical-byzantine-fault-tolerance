@@ -53,10 +53,16 @@ class Node:
                 random_node = int(random.choice(self.nodes_list))
             for i in self.nodes_list:
                 if i == random_node:
-                    async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=fake_message) as response:
+                    try:
+                        async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=fake_message) as response:
+                            pass
+                    except Exception as e:
                         pass
                 else:
-                    async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=message) as response:
+                    try:
+                        async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=message) as response:
+                            pass
+                    except Exception as e:
                         pass
             end_time = datetime.now()
             execution_time = (end_time - start_time).total_seconds()
@@ -77,7 +83,10 @@ class Node:
             message["data"] = "Corrupt"
         # Sending received message from Commander Node to all the other nodes which initiates the prepare stage
         for i in self.nodes_list:
-            await self.session.post(f'http://localhost:{8080 + i}/commit', json=message)
+            try:
+                await self.session.post(f'http://localhost:{8080 + i}/commit', json=message)
+            except Exception as e:
+                pass
         return web.HTTPOk()
 
     # Third stage of PBFT - Commit
@@ -85,7 +94,10 @@ class Node:
         message = await request.json()
         # Sending prepare message from all other nodes to all the other nodes which initiates the commit stage
         for i in self.nodes_list:
-            await self.session.post(f'http://localhost:{8080 + i}/reply', json=message)
+            try:
+                await self.session.post(f'http://localhost:{8080 + i}/reply', json=message)
+            except Exception as e:
+                pass
         return web.HTTPOk()
 
     # Final stage of PBFT - Reply

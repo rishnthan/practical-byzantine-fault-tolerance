@@ -7,13 +7,11 @@ if __name__ == '__main__':
     loop = asyncio.new_event_loop() # (for python 3.11 and above)
     asyncio.set_event_loop(loop)
 
-    # As of 10/4/2023
-    # n > 3 -> Causes an error "Error in handling Request"
-    # need to debug this error
-
+##########################################################################################################
     # Mutable variables - Can change this
-    x = 1 # number of byzantine nodes
-    type_of_byzantine = 1 # 0 - Offline Nodes, 1 - Malicious (Falsifying) Nodes
+    x = 5 # number of byzantine nodes
+    type_of_byzantine = 0 # 0 - Offline Nodes, 1 - Malicious (Falsifying) Nodes
+##########################################################################################################
 
     # Creates PBFTAggregator class object with x number of byzantine nodes
     pbft = PBFTAggregator(x)
@@ -30,7 +28,7 @@ if __name__ == '__main__':
 
     # Prints information about the nodes in network
     print(f"Total Nodes: {len(total_nodes)} -> {total_nodes}")
-    print(f"Byzantine Nodes: {len(byzantine_nodes) if type_of_byzantine == 1 else 0}  -> {byzantine_nodes if type_of_byzantine == 1 else '[NULL]'}")
+    print(f"Byzantine Nodes: {len(byzantine_nodes)}  -> {byzantine_nodes}")
     print(f"Commander Node: {len(commander_nodes)} -> {commander_nodes}")
 
     # Generates class objects for each nodes
@@ -74,7 +72,7 @@ if __name__ == '__main__':
           f"Running on http://0.0.0.0:{8080 + int(commander_nodes[0])}")
     # initializes the replies list to collect the replies of the nodes from PBFT
     # once nodes are created and started.
-    PBFTAggregator.initReplies(len(nodes))
+    PBFTAggregator.initReplies(len(total_nodes))
 
     # Ensures the webservers runs forever
     try:
