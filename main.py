@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
 ##########################################################################################################
     # Mutable variables - Can change this
-    x = 5 # number of byzantine nodes
+    x = 100 # number of byzantine nodes
     type_of_byzantine = 0 # 0 - Offline Nodes, 1 - Malicious (Falsifying) Nodes
 ##########################################################################################################
 
@@ -27,8 +27,8 @@ if __name__ == '__main__':
     nodes = []
 
     # Prints information about the nodes in network
-    print(f"Total Nodes: {len(total_nodes)} -> {total_nodes}")
-    print(f"Byzantine Nodes: {len(byzantine_nodes)}  -> {byzantine_nodes}")
+    print(f"Total Nodes: {len(total_nodes)} -> {total_nodes if len(total_nodes) < 10 else ''}")
+    print(f"Byzantine Nodes: {len(byzantine_nodes)}  -> {byzantine_nodes if len(byzantine_nodes) < 10 else ''}")
     print(f"Commander Node: {len(commander_nodes)} -> {commander_nodes}")
 
     # Generates class objects for each nodes
