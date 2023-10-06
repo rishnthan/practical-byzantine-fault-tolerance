@@ -66,5 +66,4 @@ Node 3 -> 4 Correct 2 Corrupt
 ## 4.0 Notes
 Things to note.
 1. This is a **simple** implementation of the consensus model.
-2. There are a few severe bugs which will be listed in [Issues](https://github.com/rishnthan/practical-byzantine-fault-tolerance/issues). Such as n>3 fails to even reach consensus.
-3. To change the number of byzantine nodes or the type of byzantine nodes existing within the system must be changed manually.
+2. To change the number of byzantine nodes or the type of byzantine nodes existing within the system must be changed manually.
