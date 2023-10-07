@@ -44,13 +44,15 @@ class Node:
         # Only commanders can initiate PBFT from client's request
         if self.commander:
             message = await request.json()
-            # Checking execution time
-            start_time = datetime.now()
             # Sending client's message to all the nodes which initiates the pre-prepare stage
             fake_message = {"data": "Corrupt"}
             random_node = -1
             if self.corrupt:
                 random_node = int(random.choice(self.nodes_list))
+                
+            # Checking execution time
+            print(f"\nStarting PBFT Consensus at {datetime.now()}")
+            start_time = datetime.now()
             for i in self.nodes_list:
                 if i == random_node:
                     try:
@@ -65,6 +67,7 @@ class Node:
                     except Exception as e:
                         pass
             end_time = datetime.now()
+
             execution_time = (end_time - start_time).total_seconds()
             print(f"\n\nPBFT Consensus Time: {execution_time}s")
             PBFTAggregator.checkReplies()
@@ -119,7 +122,7 @@ class Node:
             self.server = self.loop.run_until_complete(coroutine)
             # Gets address and port to print out information of the node
             address, port = self.server.sockets[0].getsockname()
-            print(f'Node {self.id} started on http://{address}:{port}' if self.total_nodes < 10 else None)
+            print(f'Node {self.id} started on http://{address}:{port}' if len(self.nodes_list) < 5 else None)
         # Checks if any exception is raised during creation process
         except Exception as e:
             sys.stderr.write('Error: ' + format(str(e)) + "\n")
