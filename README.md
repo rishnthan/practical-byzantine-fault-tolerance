@@ -17,9 +17,9 @@ There are a few types of byzantine faults:-
 The faults are simplified into two, offline (failure to return a result) and malicious/falsifying (responding with a wrong result or giving varying results to different nodes). For the sake of simplicity, the normal malicious nodes and commander malicious nodes have separate behaviour. The normal malicious node will respond with the wrong result, while the commander malicious node will respond with varying results to different system nodes. 
 
 ## 2.0 Requirements
-Python >= 3.11.1
-Aiohttp >= 3.8.5
-curl >= 7.81.0
+- Python >= 3.11.1
+- Aiohttp >= 3.8.5
+- curl >= 7.81.0
 
 ## 3.0 How-to Test
 
