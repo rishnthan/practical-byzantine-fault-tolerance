@@ -5,6 +5,7 @@
 2. Requirements
 3. How-to Test
 4. Notes
+5. Results
 
 ## 1.0 Information
 This is a simple implementation in Python of the well-known Practical Byzantine Fault Tolerance (PBFT) consensus algorithm [[1]](https://pmg.csail.mit.edu/papers/osdi99.pdf). PBFT was designed as a method to solve the Byzantine General's Problem [[2]](https://www.microsoft.com/en-us/research/publication/byzantine-generals-problem/) in a distributed system. 
@@ -67,16 +68,41 @@ Node 3 -> 4 Correct 2 Corrupt
 Things to note.
 1. This is a **simple** implementation of the consensus model.
 2. To change the number of byzantine nodes or the type of byzantine nodes existing within the system must be changed manually.
-3. Maximum 31 byzantine nodes as the error `OSError: [Errno 24] Too many open files` will be raised. (PS: I've changed my ulimit to 1040000). Results may be different.
+3. Maximum 30 byzantine nodes for offline, and 20 for malicious as the error `OSError: [Errno 24] Too many open files` will be raised. (PS: I've changed my ulimit to 1040000). Results may be different.
 4. After testing on Windows, and Linux, for some reason, Linux seems to process the request exponentially faster, for n=1, Windows took 45.7s as its fastest time to reach PBFT consensus, however on Kali it took 0.05s.
    1. Information about my specifications
       1. PC - Windows 10
          1. Intel i5 9400f
          2. RTX 3070
-         3. 16 GB DRR4 2666MHz
+         3. 16 GB DRR4 2400MHz
       2. Laptop - Kali 2022.3
          1. Intel i3 1115G4
          2. Intel GPU
-         3. 4GB DDR4 3200MHz
+         3. 4GB DDR4 1600MHz
    2. More notes regarding this disparity
       1. I believe it is because I was forced to use an Ubuntu Terminal (from Microsoft Store) to send the curl request, but once again, doubt that it caused such a disparity.
+
+## 5.0 Notes
+
+After 1 round of consensus.
+```
+Offline Nodes
+n=1   => 0.028342s
+n=5   => 1.096763s
+n=10  => 6.201925s
+n=15  => 19.93381s
+n=20  => 45.66022s
+n=25  => 96.22578s
+n=30  => 171.4794s
+```
+
+```
+Malicious Nodes
+n=1   => 0.040438s
+n=5   => 1.985410s
+n=10  => 14.36813s
+n=15  => 44.56411s
+n=20  => 103.4499s
+n=25  => OSError: [Errno 24] Too many open files
+n=30  => OSError: [Errno 24] Too many open files
+``````
