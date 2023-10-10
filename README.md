@@ -73,10 +73,10 @@ Things to note.
       1. PC - Windows 10
          1. Intel i5 9400f
          2. RTX 3070
-         3. 16 GB DRR4 2400MHz
+         3. 16 GB DRR4 2666MHz
       2. Laptop - Kali 2022.3
          1. Intel i3 1115G4
          2. Intel GPU
-         3. 4GB DDR4 1600MHz
+         3. 4GB DDR4 3200MHz
    2. More notes regarding this disparity
       1. I believe it is because I was forced to use an Ubuntu Terminal (from Microsoft Store) to send the curl request, but once again, doubt that it caused such a disparity.
