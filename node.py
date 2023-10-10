@@ -122,7 +122,8 @@ class Node:
             self.server = self.loop.run_until_complete(coroutine)
             # Gets address and port to print out information of the node
             address, port = self.server.sockets[0].getsockname()
-            print(f'Node {self.id} started on http://{address}:{port}' if len(self.nodes_list) < 5 else None)
+            if len(self.nodes_list) < 5:
+                print(f'Node {self.id} started on http://{address}:{port}')
         # Checks if any exception is raised during creation process
         except Exception as e:
             sys.stderr.write('Error: ' + format(str(e)) + "\n")

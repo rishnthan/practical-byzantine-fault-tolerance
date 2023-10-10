@@ -56,7 +56,7 @@ Once consensus is reached, the execution time of the algorithm will be outputted
 
 ***Example***
 ```
-PBFT Consensus Time: 45.0345s
+PBFT Consensus Time: 0.050912s
 Node 0 -> 4 Correct 3 Corrupt
 Node 1 -> 5 Correct 2 Corrupt
 Node 2 -> 5 Correct 2 Corrupt

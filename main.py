@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
 ##########################################################################################################
     # Mutable variables - Can change this
-    x = 1 # number of byzantine nodes
+    x = 20 # number of byzantine nodes
     type_of_byzantine = 0 # 0 - Offline Nodes, 1 - Malicious (Falsifying) Nodes
 ##########################################################################################################
 
@@ -27,8 +27,8 @@ if __name__ == '__main__':
     nodes = []
 
     # Prints information about the nodes in network
-    print(f"Total Nodes: {len(total_nodes)} -> {total_nodes if len(total_nodes) < 10 else ''}")
-    print(f"Byzantine Nodes: {len(byzantine_nodes)}  -> {byzantine_nodes if len(byzantine_nodes) < 10 else ''}")
+    print(f"Total Nodes: {len(total_nodes)} {'-> ' + total_nodes if len(total_nodes) < 10 else ''}")
+    print(f"Byzantine Nodes: {len(byzantine_nodes)} { '-> ' + byzantine_nodes if len(byzantine_nodes) < 10 else ''}")
     print(f"Commander Node: {len(commander_nodes)} -> {commander_nodes}")
 
     # Generates class objects for each nodes
@@ -48,7 +48,8 @@ if __name__ == '__main__':
             elif int(i) in byzantine_nodes:
                 # Forgo creating byzantine nodes class object
                 # to simulate offline byzantine nodes
-                print(f"Node {i} started on http://0.0.0.0:{8080 + i}")
+                if len(total_nodes) < 5:
+                    print(f"Node {i} started on http://0.0.0.0:{8080 + i}")
                 pass
             else:
                 # Generates the rest of the nodes class object while ignoring byzantine
