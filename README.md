@@ -67,3 +67,16 @@ Node 3 -> 4 Correct 2 Corrupt
 Things to note.
 1. This is a **simple** implementation of the consensus model.
 2. To change the number of byzantine nodes or the type of byzantine nodes existing within the system must be changed manually.
+3. Maximum 31 byzantine nodes as the error `OSError: [Errno 24] Too many open files` will be raised. (PS: I've changed my ulimit to 1040000). Results may be different.
+4. After testing on Windows, and Linux, for some reason, Linux seems to process the request exponentially faster, for n=1, Windows took 45.7s as its fastest time to reach PBFT consensus, however on Kali it took 0.05s.
+   1. Information about my specifications
+      1. PC - Windows 10
+         1. Intel i5 9400f
+         2. RTX 3070
+         3. 16 GB DRR4 2400MHz
+      2. Laptop - Kali 2022.3
+         1. Intel i3 1115G4
+         2. Intel GPU
+         3. 4GB DDR4 1600MHz
+   2. More notes regarding this disparity
+      1. I believe it is because I was forced to use an Ubuntu Terminal (from Microsoft Store) to send the curl request, but once again, doubt that it caused such a disparity.

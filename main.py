@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
 ##########################################################################################################
     # Mutable variables - Can change this
-    x = 20 # number of byzantine nodes
+    x = 31 # number of byzantine nodes
     type_of_byzantine = 0 # 0 - Offline Nodes, 1 - Malicious (Falsifying) Nodes
 ##########################################################################################################
 
