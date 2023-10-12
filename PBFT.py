@@ -87,6 +87,8 @@ class PBFTAggregator:
                 return i
             
     def printNetworkInfo(self):
+        print("Network Information")
+        print("-------------------")
         print(f"Total Nodes: {len(self.__nodes_list)}")
         print(f"No. of Clusters: {len(self.__clusters)}")
         print(f"Commanders: {self.__commander_nodes}")
@@ -100,7 +102,7 @@ class PBFTAggregator:
             for i in cluster:
                 if self.__type_of_byzantine == 0:
                     if i in self.__commander_nodes:
-                        commander = node.Node(8080 + i, loop, cluster, False, True)
+                        commander = node.Node(8080 + i, loop, cluster, False, True, self.__commander_nodes)
                         self.__node_objects.append(commander)
                     elif i in self.__byzantine_nodes:
                         # print(f"Node {i} started on http://0.0.0.0:{8080 + i}")
@@ -110,7 +112,7 @@ class PBFTAggregator:
                         self.__node_objects.append(rest)
                 else:
                     if i in self.__commander_nodes:
-                        commander = node.Node(8080 + i, loop, cluster, True if node in self.__byzantine_nodes else False, True)
+                        commander = node.Node(8080 + i, loop, cluster, True if node in self.__byzantine_nodes else False, True, self.__commander_nodes)
                         self.__node_objects.append(commander)
                     elif i in self.__byzantine_nodes:
                         byzantine = node.Node(8080 + i, loop, cluster, True)

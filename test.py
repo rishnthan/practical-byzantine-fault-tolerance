@@ -17,8 +17,10 @@ if __name__ == '__main__':
     # Generates class objects for each nodes
     # Note: Byzantine nodes are generated respective to their type
     pbft.createNodes(loop)
+    print("Starting Nodes\n")
     pbft.startNodes()
     pbft.printNetworkInfo()
+    PBFTAggregator.initReplies(len(pbft.getNodes()))
     # Ensures the webservers runs forever
     try:
         loop.run_forever()

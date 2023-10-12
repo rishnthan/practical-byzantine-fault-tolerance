@@ -2,15 +2,16 @@ import aiohttp
 from aiohttp import web
 import sys
 from datetime import datetime
-from PBFT import PBFTAggregator
+import PBFT
 import random
 
 
 class Node:
     # initializing the node
-    def __init__(self, port, loop, nodes_list, corrupt=False, commander=False):
+    def __init__(self, port, loop, nodes_list, corrupt=False, commander=False, rest_commanders=[]):
         self.port = port
         self.loop = loop
+        self.rest_commanders = rest_commanders
         # Creates webserver's application
         self.app = web.Application()
         # Creates the routes for the PBFT nodes
@@ -21,7 +22,7 @@ class Node:
                              web.post('/reply', self.reply)])
         # Creates the handler
         self.handler = self.app.make_handler()
-        # Creates empty server to store asyncio loop at start()
+        # Creates empty server to store asyncio loopPBFTAggregator at start()
         self.server = None
         # Changes the attribute of the node
         self.corrupt = corrupt
@@ -38,6 +39,16 @@ class Node:
     async def status(self, request):
         # Shows status of node
         return web.json_response(f'Node {self.id} Up and Running')
+
+    async def request(self, request):
+        if self.commander:
+            message = await request.json()
+            for i in self.rest_commanders:
+                try:
+                    async with self.session.post(f'http://localhost:{8080 + i}/preprepare', json=message) as response:
+                        pass
+                except Exception as e:
+                    pass
 
     # First stage of PBFT - Pre-Prepare
     async def pre_prepare(self, request):
@@ -70,9 +81,9 @@ class Node:
 
             execution_time = (end_time - start_time).total_seconds()
             print(f"\n\nPBFT Consensus Time: {execution_time}s")
-            PBFTAggregator.checkReplies()
+            PBFT.PBFTAggregator.checkReplies()
             # Resetting replies_list for next consensus run
-            PBFTAggregator.resetReplies(len(self.nodes_list) + 1)
+            PBFT.PBFTAggregator.resetReplies(len(self.nodes_list) + 1)
             return web.Response(text=f'\nPBFT Consensus Time: {execution_time}s\n')
         else:
             return web.HTTPUnauthorized()
@@ -109,7 +120,7 @@ class Node:
         # Receiving commit message from all other nodes
         # Sending the message to Client
         # Simulating sending reply to client
-        PBFTAggregator.receiveReplies([self.id, message["data"]])
+        PBFT.PBFTAggregator.receiveReplies([self.id, message["data"]])
         return web.HTTPOk()
 
     # Starting the Node
