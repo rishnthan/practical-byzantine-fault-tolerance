@@ -3,10 +3,9 @@ import node
 
 # dictionary to collect replies of nodes after final stage of PBFT
 replies_list = {}
+clusters_list = []
 
 # PBFT Aggregator Class
-
-
 class PBFTAggregator:
     # Initiate the class
     def __init__(self, num_of_byzantine, type_of_byzantine):
@@ -91,10 +90,13 @@ class PBFTAggregator:
         print("-------------------")
         print(f"Total Nodes: {len(self.__nodes_list)}")
         print(f"No. of Clusters: {len(self.__clusters)}")
-        print(f"Commanders: {self.__commander_nodes}")
-        print(f"Byzantine Nodes: {self.__byzantine_nodes}")
-        if len(self.__clusters) < 6:
+        print(f"Commanders: {len(self.__commander_nodes)}")
+        print(f"Byzantine Nodes: {len(self.__byzantine_nodes)}")
+        if len(self.__clusters) < 5:
             print(f"Clusters: {self.__clusters}")
+        temp_list = list(self.__commander_nodes)
+        temp_list.sort()
+        print(f"\n\nSend Request to http://localhost:{8080 + temp_list[0]}/request ")
               
             
     def createNodes(self, loop):
@@ -134,6 +136,11 @@ class PBFTAggregator:
     def initReplies(total_nodes):
         for i in range(total_nodes):
             replies_list[i] = []
+        
+    @staticmethod
+    def initClusterList(clusters):
+        for i in clusters:
+            clusters_list.append(i)
 
     # Receives data from nodes @ reply stage
     @staticmethod
@@ -148,9 +155,16 @@ class PBFTAggregator:
 
     # Counts and display node's data and number of corrupted, correct entries
     @staticmethod
-    def checkReplies():
+    def checkReplies(execution_time):
+        num_of_corrupt = 0
+        num_of_correct = 0
         for key, value in replies_list.items():
-            num_of_corrupt = value.count("Corrupt")
-            num_of_correct = len(replies_list[key]) - num_of_corrupt
-            print(
-                f"Node {key} -> {num_of_correct} Correct {num_of_corrupt} Corrupt")
+            num_of_corrupt += value.count("Corrupt")
+            num_of_correct += len(replies_list[key]) - value.count("Corrupt")
+
+        if num_of_correct > num_of_corrupt:
+            print(f"\n\nPBFT Consensus Successful -> Took {execution_time}s")
+        else:
+            print(f"\n\nPBFT Consensus Failed -> Took {execution_time}s")
+        
+

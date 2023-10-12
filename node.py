@@ -16,6 +16,7 @@ class Node:
         self.app = web.Application()
         # Creates the routes for the PBFT nodes
         self.app.add_routes([web.get('/status', self.status),
+                             web.post('/request', self.request),
                              web.post('/preprepare', self.pre_prepare),
                              web.post('/prepare', self.prepare),
                              web.post('/commit', self.commit),
@@ -43,12 +44,17 @@ class Node:
     async def request(self, request):
         if self.commander:
             message = await request.json()
+            start = datetime.now()
             for i in self.rest_commanders:
                 try:
                     async with self.session.post(f'http://localhost:{8080 + i}/preprepare', json=message) as response:
                         pass
                 except Exception as e:
                     pass
+            end = datetime.now()
+            execution_time = (end - start).total_seconds()
+            PBFT.PBFTAggregator.checkReplies(execution_time)
+            return web.Response(text=f'\nPBFT Consensus: {execution_time}s\n')
 
     # First stage of PBFT - Pre-Prepare
     async def pre_prepare(self, request):
@@ -60,31 +66,17 @@ class Node:
             random_node = -1
             if self.corrupt:
                 random_node = int(random.choice(self.nodes_list))
-                
-            # Checking execution time
-            print(f"\nStarting PBFT Consensus at {datetime.now()}")
-            start_time = datetime.now()
             for i in self.nodes_list:
                 if i == random_node:
                     try:
-                        async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=fake_message) as response:
-                            pass
+                        await self.session.post(f'http://localhost:{8080 + i}/prepare', json=fake_message)
                     except Exception as e:
                         pass
                 else:
                     try:
-                        async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=message) as response:
-                            pass
+                        await self.session.post(f'http://localhost:{8080 + i}/prepare', json=message)
                     except Exception as e:
                         pass
-            end_time = datetime.now()
-
-            execution_time = (end_time - start_time).total_seconds()
-            print(f"\n\nPBFT Consensus Time: {execution_time}s")
-            PBFT.PBFTAggregator.checkReplies()
-            # Resetting replies_list for next consensus run
-            PBFT.PBFTAggregator.resetReplies(len(self.nodes_list) + 1)
-            return web.Response(text=f'\nPBFT Consensus Time: {execution_time}s\n')
         else:
             return web.HTTPUnauthorized()
 
@@ -132,9 +124,9 @@ class Node:
             # Starts the loop for the webserver
             self.server = self.loop.run_until_complete(coroutine)
             # Gets address and port to print out information of the node
-            #address, port = self.server.sockets[0].getsockname()
-            #if len(self.nodes_list) < 5:
-                #print(f'Node {self.id} started on http://{address}:{port}')
+            # address, port = self.server.sockets[0].getsockname()
+            # if len(self.nodes_list) < 5:
+            # print(f'Node {self.id} started on http://{address}:{port}')
         # Checks if any exception is raised during creation process
         except Exception as e:
             sys.stderr.write('Error: ' + format(str(e)) + "\n")
@@ -142,11 +134,13 @@ class Node:
 
     # Killing the Node
     def kill(self):
-        # await self.session.close()
-        # closes node's webserver
-        self.server.close()
-        # stops the webserver app, handler and
-        # initiates cleanup
-        self.loop.run_until_complete(self.app.shutdown())
-        self.loop.run_until_complete(self.handler.shutdown(60.0))
-        self.loop.run_until_complete(self.app.cleanup())
+        try:
+            # closes node's webserver
+            self.server.close()
+            # stops the webserver app, handler and
+            # initiates cleanup
+            self.loop.run_until_complete(self.app.shutdown())
+            self.loop.run_until_complete(self.handler.shutdown(60.0))
+            self.loop.run_until_complete(self.app.cleanup())
+        except Exception as e:
+            pass
