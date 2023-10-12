@@ -3,8 +3,7 @@ import node
 from PBFT import PBFTAggregator
 
 if __name__ == '__main__':
-    # loop = asyncio.get_event_loop() (for python 3.10 and below)
-    loop = asyncio.new_event_loop() # (for python 3.11 and above)
+    loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
 ##########################################################################################################

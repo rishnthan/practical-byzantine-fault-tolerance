@@ -1,4 +1,5 @@
 import random
+import node
 
 # dictionary to collect replies of nodes after final stage of PBFT
 replies_list = {}
@@ -11,7 +12,7 @@ class PBFTAggregator:
     def __init__(self, num_of_byzantine, type_of_byzantine):
         self.__num_of_byzantines = num_of_byzantine
         self.__type_of_byzantine = type_of_byzantine
-
+        self.__node_objects = []
         self.__nodes_list = self.__nodes_list()
         self.__clusters = self.__cluster_nodes()
         self.__commander_nodes = self.__gen_commander_nodes()
@@ -79,6 +80,52 @@ class PBFTAggregator:
     # Get commander_node from class instance
     def getCommanderNodes(self):
         return self.__commander_nodes
+
+    def getCommanderCluster(self, commanderNode):
+        for i in self.__clusters:
+            if commanderNode in i:
+                return i
+            
+    def printNetworkInfo(self):
+        print(f"Total Nodes: {len(self.__nodes_list)}")
+        print(f"No. of Clusters: {len(self.__clusters)}")
+        print(f"Commanders: {self.__commander_nodes}")
+        print(f"Byzantine Nodes: {self.__byzantine_nodes}")
+        if len(self.__clusters) < 6:
+            print(f"Clusters: {self.__clusters}")
+              
+            
+    def createNodes(self, loop):
+        for cluster in self.__clusters:
+            for i in cluster:
+                if self.__type_of_byzantine == 0:
+                    if i in self.__commander_nodes:
+                        commander = node.Node(8080 + i, loop, cluster, False, True)
+                        self.__node_objects.append(commander)
+                    elif i in self.__byzantine_nodes:
+                        # print(f"Node {i} started on http://0.0.0.0:{8080 + i}")
+                        pass
+                    else:
+                        rest = node.Node(8080 + i, loop, cluster)
+                        self.__node_objects.append(rest)
+                else:
+                    if i in self.__commander_nodes:
+                        commander = node.Node(8080 + i, loop, cluster, True if node in self.__byzantine_nodes else False, True)
+                        self.__node_objects.append(commander)
+                    elif i in self.__byzantine_nodes:
+                        byzantine = node.Node(8080 + i, loop, cluster, True)
+                        self.__node_objects.append(byzantine)
+                    else:
+                        rest = node.Node(8080 + i, loop, cluster)
+                        self.__node_objects.append(rest)
+    
+    def startNodes(self):
+        for node in self.__node_objects:
+            node.start()
+
+    def killNodes(self):
+        for node in self.__node_objects:
+            node.kill()
 
     # Initializes replies_list dictionary
     @staticmethod
