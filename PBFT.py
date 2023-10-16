@@ -1,11 +1,14 @@
 import random
 import node
+import math
 
 # dictionary to collect replies of nodes after final stage of PBFT
 replies_list = {}
 clusters_list = []
 
 # PBFT Aggregator Class
+
+
 class PBFTAggregator:
     # Initiate the class
     def __init__(self, num_of_byzantine, type_of_byzantine):
@@ -13,7 +16,10 @@ class PBFTAggregator:
         self.__type_of_byzantine = type_of_byzantine
         self.__node_objects = []
         self.__nodes_list = self.__nodes_list()
+        self.__coordinates = self.__gen_coordinates()
         self.__clusters = self.__cluster_nodes()
+        self.__coordinates_in_clusters = self.__cluster_coordinates()
+        self.__node_distances = self.__calculate_distances_within_clusters()
         self.__commander_nodes = self.__gen_commander_nodes()
         self.__byzantine_nodes = self.__gen_byzantine_nodes()
 
@@ -26,6 +32,14 @@ class PBFTAggregator:
         for i in range(0, total_nodes):
             nodes_list.append(i)
         return nodes_list
+
+    def __gen_coordinates(self):
+        coordinates = []
+        for i in range(len(self.__nodes_list)):
+            x = random.randint(0, 100)
+            y = random.randint(0, 100)
+            coordinates.append((x, y))
+        return coordinates
 
     def __cluster_nodes(self):
         temp_list = list(self.__nodes_list)
@@ -40,6 +54,44 @@ class PBFTAggregator:
             cluster_nodes_list.append(cluster)
         cluster_nodes_list.sort()
         return cluster_nodes_list
+
+    def __cluster_coordinates(self):
+        clustered_coordinates = []
+        for cluster in self.__clusters:
+            temp_list = []
+            for i in cluster:
+                temp_list.append(self.__coordinates[i])
+            clustered_coordinates.append(temp_list)
+        return clustered_coordinates
+
+    @staticmethod
+    def __calculate_distance(node1, node2):
+        x1, y1 = node1
+        x2, y2 = node2
+        return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+    def __calculate_cluster_distances(self, cluster):
+        n = len(cluster)
+        distances = [[0.0] * n for _ in range(n)]
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                distance = self.__calculate_distance(cluster[i], cluster[j])
+                distances[i][j] = round(distance, 3)
+                distances[j][i] = round(distance, 3)
+        distances = [[distances[i][j] for j in range(
+            len(distances[i])) if i != j] for i in range(len(distances))]
+        return distances
+    
+    def __calculate_distances_within_clusters(self):
+        distance_within_cluster = []
+        for i, cluster in enumerate(self.__coordinates_in_clusters):
+            cluster_distances = self.__calculate_cluster_distances(cluster)
+            temp = []
+            for j, row in enumerate(cluster_distances):
+                temp.append(row)
+            distance_within_cluster.append(temp)
+        return distance_within_cluster
 
     # Select Commander Node at random
     def __gen_commander_nodes(self):
@@ -63,9 +115,9 @@ class PBFTAggregator:
             byzantine_nodes.append(x)
         byzantine_nodes.sort()
         return byzantine_nodes
-            
 
     # Get nodes_list from class instance
+
     def getNodes(self):
         return self.__nodes_list
 
@@ -80,11 +132,20 @@ class PBFTAggregator:
     def getCommanderNodes(self):
         return self.__commander_nodes
 
+    def getCoordinates(self):
+        return self.__coordinates
+
+    def getClusterCoordinates(self):
+        return self.__coordinates_in_clusters
+    
+    def getClusterDistances(self):
+        return self.__node_distances
+
     def getCommanderCluster(self, commanderNode):
         for i in self.__clusters:
             if commanderNode in i:
                 return i
-            
+
     def printNetworkInfo(self):
         print("Network Information")
         print("-------------------")
@@ -96,15 +157,16 @@ class PBFTAggregator:
             print(f"Clusters: {self.__clusters}")
         temp_list = list(self.__commander_nodes)
         temp_list.sort()
-        print(f"\n\nSend Request to http://localhost:{8080 + temp_list[0]}/request ")
-              
-            
+        print(
+            f"\n\nSend Request to http://localhost:{8080 + temp_list[0]}/request ")
+
     def createNodes(self, loop):
         for cluster in self.__clusters:
             for i in cluster:
                 if self.__type_of_byzantine == 0:
                     if i in self.__commander_nodes:
-                        commander = node.Node(8080 + i, loop, cluster, False, True, self.__commander_nodes)
+                        commander = node.Node(
+                            8080 + i, loop, cluster, False, True, self.__commander_nodes)
                         self.__node_objects.append(commander)
                     elif i in self.__byzantine_nodes:
                         # print(f"Node {i} started on http://0.0.0.0:{8080 + i}")
@@ -114,7 +176,8 @@ class PBFTAggregator:
                         self.__node_objects.append(rest)
                 else:
                     if i in self.__commander_nodes:
-                        commander = node.Node(8080 + i, loop, cluster, True if node in self.__byzantine_nodes else False, True, self.__commander_nodes)
+                        commander = node.Node(
+                            8080 + i, loop, cluster, True if node in self.__byzantine_nodes else False, True, self.__commander_nodes)
                         self.__node_objects.append(commander)
                     elif i in self.__byzantine_nodes:
                         byzantine = node.Node(8080 + i, loop, cluster, True)
@@ -122,7 +185,7 @@ class PBFTAggregator:
                     else:
                         rest = node.Node(8080 + i, loop, cluster)
                         self.__node_objects.append(rest)
-    
+
     def startNodes(self):
         for node in self.__node_objects:
             node.start()
@@ -136,7 +199,7 @@ class PBFTAggregator:
     def initReplies(total_nodes):
         for i in range(total_nodes):
             replies_list[i] = []
-        
+
     @staticmethod
     def initClusterList(clusters):
         for i in clusters:
@@ -166,5 +229,3 @@ class PBFTAggregator:
             print(f"\n\nPBFT Consensus Successful -> Took {execution_time}s")
         else:
             print(f"\n\nPBFT Consensus Failed -> Took {execution_time}s")
-        
-

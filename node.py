@@ -47,8 +47,7 @@ class Node:
             start = datetime.now()
             for i in self.rest_commanders:
                 try:
-                    async with self.session.post(f'http://localhost:{8080 + i}/preprepare', json=message) as response:
-                        pass
+                    await self.session.post(f'http://localhost:{8080 + i}/preprepare', json=message)
                 except Exception as e:
                     pass
             end = datetime.now()
